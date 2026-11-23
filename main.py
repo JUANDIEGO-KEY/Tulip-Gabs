@@ -938,6 +938,23 @@ class Bouquet:
 
 
 # ---------------------------------------------------------------- programa
+def fit_canvas():
+    """En la web, corrige el tamaño del lienzo si quedó deformado.
+
+    La plantilla de pygbag calcula la proporción del canvas antes de que el
+    programa lo agrande a 720x1088, y en pantallas horizontales lo deja
+    cuadrado. Si la proporción no cuadra, se le pide que la recalcule.
+    """
+    try:
+        import platform as _pf
+        rect = _pf.window.canvas.getBoundingClientRect()
+        w, h = float(rect.width), float(rect.height)
+        if h <= 0 or abs((w / h) / (W / H) - 1.0) > 0.02:
+            _pf.window.window_resize()
+    except Exception:
+        pass
+
+
 async def main():
     pygame.init()
     pygame.display.set_caption("tulipanes")
@@ -969,7 +986,11 @@ async def main():
     paused = False
     running = True
     shots = 0
+    frames = 0
     while running:
+        frames += 1
+        if WEB and frames % 20 == 1:
+            fit_canvas()
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
                 running = False
