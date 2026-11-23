@@ -935,6 +935,11 @@ async def main():
     if WEB:
         screen = pygame.display.set_mode((W, H))
         scale = 1.0
+        try:
+            import platform as _pf
+            _pf.document.body.style.background = "#0b0918"   # sin barras grises a los lados
+        except Exception:
+            pass
     else:
         try:
             dh = pygame.display.get_desktop_sizes()[0][1]
