@@ -646,6 +646,7 @@ class Bouquet:
         self.t = 0.0
         self.cache = {}
         self.msg_key = None
+        self.last_build = -10000
         self.last_tap = -99.0
         self.tapped = False
         self.hearts = []
@@ -788,6 +789,12 @@ class Bouquet:
         self.glow.fill((175, 175, 175), special_flags=pygame.BLEND_RGB_MULT)
 
     def update_scene(self, t):
+        # la escena se recalcula a 30 Hz como máximo: en celulares lentos el
+        # navegador queda libre para el balanceo y las partículas, que van a 60 Hz
+        now = pygame.time.get_ticks()
+        if now - self.last_build < 33:
+            return
+        self.last_build = now
         dirty = False
         layers = []
         for z, name, key, fn in self.layer_specs(t):
@@ -959,7 +966,7 @@ async def main():
             elif e.type == pygame.MOUSEBUTTONDOWN:
                 # en celulares SDL convierte el toque en clic, así que basta con esto
                 bouquet.tap(e.pos[0] / scale, e.pos[1] / scale)
-        dt = min(clock.tick(FPS) / 1000.0, 0.05)
+        dt = min(clock.tick(FPS) / 1000.0, 0.1)
         if not paused:
             bouquet.step(dt)
         bouquet.draw(frame)
