@@ -20,7 +20,7 @@ import pygame
 WEB = sys.platform == "emscripten"
 
 # --------------------------------------------------------------- ajustes
-MESSAGE = "para ti, feliz cumpleaños, Gaby"   # se puede cambiar con ?msg=... en la web
+MESSAGE = "para ti, feliz cumplea\u00f1os, Gaby"   # \u00f1 = ñ; se cambia con ?msg=... en la web
 W, H = 720, 1088                    # lienzo virtual (vertical, para celular)
 CW, CH = 9, 16                      # tamaño de cada celda de texto
 COLS, ROWS = W // CW, H // CH       # 80 x 68 celdas
@@ -570,17 +570,26 @@ def wrap_message(msg, width=34):
     return [ln for ln in lines if ln][:3] or [""]
 
 
+def read_query():
+    """Parámetros del link (?msg=...&t=...). Solo en la versión web."""
+    if not WEB:
+        return {}
+    try:
+        import platform as _pf
+        from urllib.parse import parse_qs
+        search = str(_pf.window.location.search)
+        return parse_qs(search[1:]) if search.startswith("?") else {}
+    except Exception:
+        return {}
+
+
 def read_message():
     msg = MESSAGE
     try:
         if WEB:
-            import platform as _pf
-            search = str(_pf.window.location.search)
-            if search.startswith("?"):
-                from urllib.parse import parse_qs
-                q = parse_qs(search[1:])
-                if q.get("msg") and q["msg"][0].strip():
-                    msg = q["msg"][0]
+            q = read_query()
+            if q.get("msg") and q["msg"][0].strip():
+                msg = q["msg"][0]
         elif len(sys.argv) > 1:
             msg = " ".join(sys.argv[1:])
     except Exception:
@@ -950,6 +959,12 @@ async def main():
     frame = pygame.Surface((W, H)) if scale < 1.0 else screen
 
     bouquet = Bouquet(read_message())
+    try:                                    # ?t=20 salta directo a ese segundo
+        start = float(read_query().get("t", ["0"])[0])
+    except ValueError:
+        start = 0.0
+    while bouquet.t < min(start, 60.0):
+        bouquet.step(0.05)
     clock = pygame.time.Clock()
     paused = False
     running = True
