@@ -20,7 +20,7 @@ import pygame
 WEB = sys.platform == "emscripten"
 
 # --------------------------------------------------------------- ajustes
-MESSAGE = "para ti ♥"          # se puede cambiar con ?msg=... en la web
+MESSAGE = "para ti, feliz cumpleaños, Gaby"   # se puede cambiar con ?msg=... en la web
 W, H = 720, 1088                    # lienzo virtual (vertical, para celular)
 CW, CH = 9, 16                      # tamaño de cada celda de texto
 COLS, ROWS = W // CW, H // CH       # 80 x 68 celdas

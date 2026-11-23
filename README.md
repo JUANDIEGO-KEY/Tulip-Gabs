@@ -18,7 +18,7 @@ suelta corazones y una ráfaga de aire.
 Cada vez que se hace push a `main`, GitHub Actions compila la versión web y la
 publica en GitHub Pages (`.github/workflows/web.yml`).
 
-El mensaje se puede cambiar desde el link, sin tocar el código, con `?msg=`.
+El mensaje por defecto es "para ti, feliz cumpleaños, Gaby". Se puede cambiar desde el link, sin tocar el código, con `?msg=`.
 Los espacios van como `+`, `|` hace un salto de línea y el corazón es `%E2%99%A5`:
 
 ```
