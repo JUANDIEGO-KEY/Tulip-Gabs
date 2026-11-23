@@ -13,7 +13,7 @@ suelta corazones y una ráfaga de aire.
 
 ## Verlo en la web
 
-**https://juandiego-key.github.io/tulip-gabs/**
+**https://juandiego-key.github.io/Tulip-Gabs/**
 
 Cada vez que se hace push a `main`, GitHub Actions compila la versión web y la
 publica en GitHub Pages (`.github/workflows/web.yml`).
@@ -22,8 +22,8 @@ El mensaje se puede cambiar desde el link, sin tocar el código, con `?msg=`.
 Los espacios van como `+`, `|` hace un salto de línea y el corazón es `%E2%99%A5`:
 
 ```
-https://juandiego-key.github.io/tulip-gabs/?msg=feliz+cumple+%E2%99%A5
-https://juandiego-key.github.io/tulip-gabs/?msg=estos+tulipanes|son+para+ti
+https://juandiego-key.github.io/Tulip-Gabs/?msg=feliz+cumple+%E2%99%A5
+https://juandiego-key.github.io/Tulip-Gabs/?msg=estos+tulipanes|son+para+ti
 ```
 
 La fuente incluye letras con tilde y la ñ, pero no emojis.
