@@ -7,7 +7,8 @@ a WebAssembly.
 
 Primero se arma el cono de papel y se amarra el lazo. Después crecen los tallos
 y las hojas, salen los botones verdes, se pintan de color desde la punta y los
-tulipanes se abren uno por uno. Al final aparece un mensaje escrito a máquina.
+tulipanes (entre ellos dos rosado claro) se abren uno por uno, rodeados de
+racimos de flores no me olvides. Al final aparece un mensaje escrito a máquina.
 El ramo se mece con el viento entre luciérnagas, y cada toque en la pantalla
 suelta corazones y una ráfaga de aire.
 
@@ -63,7 +64,7 @@ y abre http://localhost:8000.
 - **Brillo:** una copia borrosa de la escena se suma encima para el efecto de luz.
 
 Los colores, las posiciones de las flores y los tiempos están al inicio de
-`main.py` (`SCHEMES`, `TULIPS`, `LEAVES`, `BLOOM_ORDER`).
+`main.py` (`SCHEMES`, `TULIPS`, `LEAVES`, `BLOOM_ORDER`, `FORGET_ME_NOTS`).
 
 ## Créditos
 

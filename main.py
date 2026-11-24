@@ -39,6 +39,7 @@ SCHEMES = {                         # (color de la base, color de la punta)
     "blanco": ((200, 190, 222), (255, 255, 255)),
     "naranja": ((234, 82, 18), (255, 188, 84)),
     "coral": ((248, 100, 98), (255, 224, 180)),
+    "rosa_claro": ((248, 164, 198), (255, 234, 243)),
 }
 
 # x, y del centro de la flor, escala, color, capa (z)
@@ -54,8 +55,26 @@ TULIPS = [
     (360, 462, 1.05, "rojo", 5),
     (482, 488, 1.00, "morado", 5),
     (360, 562, 0.95, "coral", 7),
+    (160, 298, 0.86, "rosa_claro", 3),
+    (560, 300, 0.86, "rosa_claro", 3),
 ]
-BLOOM_ORDER = [8, 1, 4, 10, 6, 2, 9, 3, 0, 5, 7]   # orden en que se abren
+BLOOM_ORDER = [8, 1, 4, 10, 6, 11, 2, 9, 3, 12, 0, 5, 7]   # orden en que se abren
+
+# racimos de flores "no me olvides": x, y, radio x, radio y, flores, capa (z)
+FORGET_ME_NOTS = [
+    (110, 452, 38, 30, 14, 2),
+    (608, 456, 38, 30, 14, 2),
+    (305, 292, 28, 22, 9, 2),
+    (416, 290, 28, 22, 9, 2),
+    (236, 430, 22, 20, 8, 4.5),
+    (484, 430, 22, 20, 8, 4.5),
+    (192, 566, 40, 26, 15, 6.5),
+    (528, 562, 40, 26, 15, 6.5),
+    (288, 606, 30, 20, 10, 6.5),
+    (434, 602, 30, 20, 10, 6.5),
+]
+FMN_BLUES = [(96, 156, 255), (128, 184, 255), (84, 136, 238)]
+FMN_BUD = (246, 160, 206)                 # los botones del no me olvides son rosados
 
 # hojas: base, punto de control, punta, ancho máximo
 LEAVES = [
@@ -84,6 +103,7 @@ T_TWINE = (2.6, 0.9)
 T_STEMS, STEM_GAP, STEM_DUR = 3.3, 0.16, 1.5
 T_LEAVES, LEAF_GAP, LEAF_DUR = 4.2, 0.22, 1.8
 T_COLOR, COLOR_GAP, COLOR_DUR = 7.6, 0.20, 1.3
+T_FMN, FMN_GAP, FMN_DUR = 8.3, 0.16, 0.9
 T_BLOOM, BLOOM_GAP, BLOOM_DUR = 10.0, 0.42, 1.1
 T_MSG = T_BLOOM + BLOOM_GAP * (len(TULIPS) - 1) + BLOOM_DUR + 0.5
 MSG_RATE = 0.085
@@ -538,6 +558,56 @@ class Leaf:
         return out
 
 
+class ForgetMeNot:
+    """Racimo de florecitas azules (y algunos botones rosados) con su tallo."""
+
+    def __init__(self, i, spec):
+        x, y, rx, ry, n, self.z = spec
+        rnd = random.Random(i * 97 + 3)
+        self.florets, seen = [], set()
+        tries = 0
+        while len(self.florets) < n and tries < 300:
+            tries += 1
+            a, d = rnd.uniform(0, 2 * math.pi), math.sqrt(rnd.random())
+            c, r = int((x + math.cos(a) * rx * d) // CW), int((y + math.sin(a) * ry * d) // CH)
+            if (c, r) in seen:
+                continue
+            seen.add((c, r))
+            kk = key_of(c, r)
+            if kk is None:
+                continue
+            if rnd.random() < 0.2:
+                self.florets.append((kk, "o", FMN_BUD))
+            else:
+                ch = "\u273f" if rnd.random() < 0.7 else "\u2740"
+                self.florets.append((kk, ch, rnd.choice(FMN_BLUES)))
+        sx, sy = x, y + ry * 0.5
+        dx, dy = 357 - sx, 790 - sy
+        ln = math.hypot(dx, dy) or 1.0
+        self.stem = []
+        for k in range(14):
+            q = k / 13 * 60.0
+            c, r = int((sx + dx / ln * q) // CW), int((sy + dy / ln * q) // CH)
+            if (c, r) in seen:
+                continue
+            seen.add((c, r))
+            kk = key_of(c, r)
+            if kk is not None:
+                self.stem.append((kk, dir_char(dx, dy), shade(STEM, 0.85)))
+        self.stem.reverse()                 # crece desde abajo hacia el racimo
+
+    def cells(self, p):
+        if p <= 0:
+            return []
+        out = self.stem[:int(len(self.stem) * clamp(p / 0.35))]
+        n = len(self.florets)
+        for k, (kk, ch, col) in enumerate(self.florets):
+            th = 0.3 + 0.65 * k / max(1, n)
+            if p >= th:
+                out.append((kk, ch, mix((255, 255, 255), col, clamp((p - th) / 0.15))))
+        return out
+
+
 # ------------------------------------------------------------------ dibujo
 class Glyphs:
     def __init__(self, font):
@@ -620,6 +690,7 @@ class Bouquet:
         self.band, self.bow, self.knot = build_twine()
         self.stems = [Stem(tp) for tp in TULIPS]
         self.leaves = [Leaf(sp) for sp in LEAVES]
+        self.fmns = [ForgetMeNot(i, sp) for i, sp in enumerate(FORGET_ME_NOTS)]
         self.bloom_rank = {idx: k for k, idx in enumerate(BLOOM_ORDER)}
 
         self.msg_surf = pygame.Surface((W, 10 + 40 * len(self.lines) + 10))
@@ -696,6 +767,9 @@ class Bouquet:
             st = self.tulip_state(i, t)
             key = tuple(round(v, 3) for v in st)
             specs.append((tp[4], "tulip%d" % i, key, lambda st=st, tp=tp: tulip_cells(tp, *st)))
+        for i, fm in enumerate(self.fmns):
+            g = window(t, T_FMN + i * FMN_GAP, FMN_DUR)
+            specs.append((fm.z, "fmn%d" % i, round(g, 3), lambda g=g, fm=fm: fm.cells(g)))
         p = window(t, *T_KRAFT)
         specs.append((6, "kraft", round(p, 3), lambda p=p: self.kraft_cells(p)))
         p = window(t, *T_TWINE)
